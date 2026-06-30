@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --red: #C1364A;
@@ -32,7 +33,7 @@
     .nav-links { display: flex; gap: 2rem; list-style: none; }
     .nav-links a { font-size: 14px; color: var(--muted); text-decoration: none; transition: color 0.2s; cursor: pointer; }
     .nav-links a:hover { color: var(--ink); }
-    .nav-cta { background: var(--red); color: var(--white); border: none; padding: 8px 20px; border-radius: 4px; font-size: 14px; font-family: 'Inter', sans-serif; cursor: pointer; text-decoration: none; transition: background 0.2s; }
+    .nav-cta { background: var(--red); color: var(--white); border: none; padding: 8px 20px; border-radius: 4px; font-size: 14px; font-family: 'Inter', sans-serif; cursor: pointer; transition: background 0.2s; }
     .nav-cta:hover { background: var(--red-dark); }
     .hamburger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; padding: 4px; }
     .hamburger span { display: block; width: 22px; height: 2px; background: var(--ink); border-radius: 2px; }
@@ -49,7 +50,7 @@
     .btn-red:hover { background: var(--red-dark); }
     .btn-outline { background: transparent; color: var(--ink); border: 1px solid var(--border); padding: 13px 28px; border-radius: 4px; font-size: 15px; font-family: 'Inter', sans-serif; cursor: pointer; text-decoration: none; display: inline-block; transition: border-color 0.2s; }
     .btn-outline:hover { border-color: var(--ink); }
-    .btn-white { background: var(--white); color: var(--ink); border: none; padding: 14px 28px; border-radius: 4px; font-size: 15px; font-family: 'Inter', sans-serif; font-weight: 500; cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-block; transition: opacity 0.2s; }
+    .btn-white { background: var(--white); color: var(--ink); border: none; padding: 14px 28px; border-radius: 4px; font-size: 15px; font-family: 'Inter', sans-serif; font-weight: 500; cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-block; }
     .btn-white:hover { opacity: 0.9; }
 
     /* DIVIDER */
@@ -78,7 +79,8 @@
     .strip-link { font-size: 13px; color: var(--red); text-decoration: none; cursor: pointer; }
     .strip-link:hover { text-decoration: underline; }
     .articles-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem; }
-    .article-card { cursor: pointer; }
+    .article-card { cursor: pointer; transition: opacity 0.2s; }
+    .article-card:hover { opacity: 0.85; }
     .article-thumb { background: var(--surface); border-radius: 6px; height: 180px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; overflow: hidden; position: relative; }
     .article-thumb-lg { height: 260px; }
     .thumb-label { font-family: 'Playfair Display', serif; font-size: 40px; color: var(--red); opacity: 0.12; font-weight: 600; }
@@ -103,6 +105,12 @@
     .submit-band h2 { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 600; color: var(--white); line-height: 1.2; margin-bottom: 0.5rem; }
     .submit-band p { font-size: 15px; color: rgba(255,255,255,0.5); }
 
+    /* LOADING */
+    .loading-state { text-align: center; padding: 3rem; color: var(--muted); font-size: 14px; }
+    .loading-spinner { display: inline-block; width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--red); border-radius: 50%; animation: spin 0.7s linear infinite; margin-bottom: 0.8rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-state { text-align: center; padding: 3rem; color: var(--muted); font-size: 15px; }
+
     /* ARTICLE READER */
     .reader { max-width: 720px; margin: 0 auto; padding: 3rem 2rem 5rem; }
     .reader-back { font-size: 13px; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 2rem; text-decoration: none; background: none; border: none; font-family: 'Inter', sans-serif; }
@@ -124,12 +132,11 @@
     .writer-submit-btn { background: var(--red); color: var(--white); border: none; padding: 8px 22px; border-radius: 20px; font-size: 14px; font-family: 'Inter', sans-serif; cursor: pointer; transition: background 0.2s; }
     .writer-submit-btn:hover { background: var(--red-dark); }
     .writer-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); line-height: 1; }
-    .writer-close:hover { color: var(--ink); }
     .writer-body { max-width: 720px; margin: 0 auto; padding: 3rem 2rem 6rem; }
     .writer-meta-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
     .writer-meta-row input, .writer-meta-row select { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 5px; font-size: 14px; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--ink); outline: none; }
     .writer-meta-row input:focus, .writer-meta-row select:focus { border-color: var(--red); }
-    .writer-title-input { width: 100%; border: none; outline: none; font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 600; color: var(--ink); background: transparent; resize: none; line-height: 1.2; margin-bottom: 1.5rem; placeholder-color: #ccc; }
+    .writer-title-input { width: 100%; border: none; outline: none; font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 600; color: var(--ink); background: transparent; resize: none; line-height: 1.2; margin-bottom: 1.5rem; }
     .writer-title-input::placeholder { color: #C8C8C8; }
     .writer-toolbar { display: flex; gap: 0.5rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
     .toolbar-btn { background: none; border: 1px solid var(--border); border-radius: 4px; padding: 5px 10px; font-size: 13px; cursor: pointer; font-family: 'Inter', sans-serif; color: var(--ink-soft); transition: background 0.15s; }
@@ -142,10 +149,7 @@
 
     /* TOPICS PAGE */
     .topics-page { max-width: 1100px; margin: 0 auto; padding: 4rem 2rem; }
-    .topics-page-header { text-align: center; margin-bottom: 3rem; }
-    .topics-page-header h1 { font-family: 'Playfair Display', serif; font-size: 48px; font-weight: 600; margin-bottom: 0.8rem; }
-    .topics-page-header p { font-size: 17px; color: var(--muted); }
-    .topics-full-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    .topics-full-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 3rem; }
     .topic-full-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 2rem; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; }
     .topic-full-card:hover { border-color: var(--red); box-shadow: 0 4px 20px rgba(193,54,74,0.08); }
     .topic-full-icon { font-size: 32px; margin-bottom: 1rem; }
@@ -169,7 +173,7 @@
     .issue-title { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; line-height: 1.35; margin-bottom: 0.5rem; }
     .issue-date { font-size: 12px; color: #999; }
 
-    /* WRITE FOR US PAGE */
+    /* WRITE FOR US */
     .wfu { max-width: 800px; margin: 0 auto; padding: 4rem 2rem 6rem; }
     .wfu-hero { text-align: center; margin-bottom: 4rem; }
     .wfu-eyebrow { font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--red); margin-bottom: 1rem; }
@@ -179,9 +183,8 @@
     .guide-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; }
     .guide-card h3 { font-size: 14px; font-weight: 500; margin-bottom: 0.5rem; }
     .guide-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
-    .wfu-cta-center { text-align: center; }
 
-    /* ABOUT PAGE */
+    /* ABOUT */
     .about { max-width: 800px; margin: 0 auto; padding: 4rem 2rem 6rem; }
     .about-title { font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 600; line-height: 1.1; margin-bottom: 1.5rem; }
     .about-title em { font-style: italic; color: var(--red); }
@@ -200,27 +203,24 @@
     .follow-link { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: rgba(255,255,255,0.75); text-decoration: none; font-size: 13px; transition: border-color 0.2s; }
     .follow-link:hover { border-color: rgba(255,255,255,0.5); color: var(--white); }
 
-    /* ADMIN LOGIN */
+    /* ADMIN */
     .admin-login { max-width: 420px; margin: 6rem auto; padding: 2rem; text-align: center; }
     .admin-login h2 { font-family: 'Playfair Display', serif; font-size: 28px; margin-bottom: 0.5rem; }
     .admin-login p { color: var(--muted); font-size: 14px; margin-bottom: 2rem; }
     .admin-login input { width: 100%; padding: 12px 16px; border: 1px solid var(--border); border-radius: 5px; font-size: 15px; font-family: 'Inter', sans-serif; margin-bottom: 1rem; outline: none; background: var(--white); }
     .admin-login input:focus { border-color: var(--red); }
     .admin-login button { width: 100%; background: var(--red); color: var(--white); border: none; padding: 13px; border-radius: 4px; font-size: 15px; font-family: 'Inter', sans-serif; cursor: pointer; }
-    .admin-login button:hover { background: var(--red-dark); }
     .admin-error { color: var(--red); font-size: 13px; margin-bottom: 1rem; display: none; }
-
-    /* ADMIN PANEL */
-    .admin-panel { max-width: 900px; margin: 0 auto; padding: 3rem 2rem 6rem; }
-    .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+    .admin-panel { max-width: 960px; margin: 0 auto; padding: 3rem 2rem 6rem; }
+    .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
     .admin-header h1 { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 600; }
-    .admin-tabs { display: flex; gap: 0.5rem; margin-bottom: 2rem; }
+    .admin-tabs { display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
     .admin-tab { padding: 8px 20px; border: 1px solid var(--border); border-radius: 4px; font-size: 14px; cursor: pointer; background: var(--white); font-family: 'Inter', sans-serif; color: var(--muted); transition: all 0.2s; }
     .admin-tab.active { background: var(--red); color: var(--white); border-color: var(--red); }
     .admin-section { display: none; }
     .admin-section.active { display: block; }
-    .admin-publish-form { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 2rem; }
-    .admin-publish-form h2 { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 1.5rem; }
+    .admin-form { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 2rem; }
+    .admin-form h2 { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 1.5rem; }
     .form-group { margin-bottom: 1.25rem; }
     .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 0.4rem; color: var(--ink-soft); }
     .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 5px; font-size: 14px; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--ink); outline: none; }
@@ -230,12 +230,19 @@
     .publish-btn { background: var(--red); color: var(--white); border: none; padding: 12px 32px; border-radius: 4px; font-size: 15px; font-family: 'Inter', sans-serif; cursor: pointer; transition: background 0.2s; }
     .publish-btn:hover { background: var(--red-dark); }
     .published-list { display: flex; flex-direction: column; gap: 1rem; }
-    .published-item { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; }
+    .published-item { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
     .published-item-title { font-size: 15px; font-weight: 500; margin-bottom: 0.3rem; }
     .published-item-meta { font-size: 12px; color: var(--muted); }
-    .del-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 6px 14px; border-radius: 4px; font-size: 13px; cursor: pointer; font-family: 'Inter', sans-serif; }
-    .del-btn:hover { border-color: var(--red); color: var(--red); }
-    .empty-state { text-align: center; padding: 3rem; color: var(--muted); font-size: 15px; }
+    .action-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 6px 14px; border-radius: 4px; font-size: 13px; cursor: pointer; font-family: 'Inter', sans-serif; }
+    .action-btn:hover { border-color: var(--red); color: var(--red); }
+    .submission-item { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; }
+    .submission-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+    .submission-title { font-size: 16px; font-weight: 500; margin-bottom: 0.3rem; }
+    .submission-meta { font-size: 12px; color: var(--muted); }
+    .submission-preview { font-size: 14px; color: var(--ink-soft); line-height: 1.6; max-height: 80px; overflow: hidden; margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid var(--border); }
+    .status-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+    .status-pending { background: #FFF3CD; color: #856404; }
+    .status-approved { background: #D1FAE5; color: #065F46; }
 
     /* FOOTER */
     footer { background: var(--ink); color: rgba(255,255,255,0.6); padding: 3rem 2rem; margin-top: 2rem; }
@@ -270,7 +277,6 @@
       .writer-meta-row { grid-template-columns: 1fr; }
       .writer-title-input { font-size: 28px; }
       .form-row-2 { grid-template-columns: 1fr; }
-      .admin-tabs { flex-wrap: wrap; }
     }
     @media (max-width: 480px) {
       .topics-grid { grid-template-columns: 1fr; }
@@ -294,9 +300,7 @@
       <li><a onclick="showPage('admin')" style="color:var(--red);">✦ Admin</a></li>
     </ul>
     <button class="nav-cta" onclick="openWriter()">Write your story</button>
-    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
+    <button class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
   </div>
   <div class="mobile-menu" id="mobileMenu">
     <a onclick="showPage('home');toggleMenu()">Home</a>
@@ -308,20 +312,20 @@
   </div>
 </nav>
 
-<!-- MEDIUM-STYLE WRITER OVERLAY -->
+<!-- WRITER OVERLAY -->
 <div class="writer-overlay" id="writerOverlay">
   <div class="writer-topbar">
     <span class="writer-logo">Full Stop<span>.</span></span>
     <div class="writer-topbar-right">
-      <span id="writerSavingStatus" style="font-size:13px;color:var(--muted);"></span>
+      <span id="writerStatus" style="font-size:13px;color:var(--muted);"></span>
       <button class="writer-submit-btn" onclick="submitStory()">Submit story</button>
       <button class="writer-close" onclick="closeWriter()">✕</button>
     </div>
   </div>
   <div class="writer-body" id="writerForm">
     <div class="writer-meta-row">
-      <input type="text" id="w-name" placeholder="Your name (or leave blank)" />
-      <input type="email" id="w-email" placeholder="Email address *" required />
+      <input type="text" id="w-name" placeholder="Your name (optional)" />
+      <input type="email" id="w-email" placeholder="Email address *" />
       <select id="w-category">
         <option value="">Select topic *</option>
         <option>Personal story</option>
@@ -338,8 +342,7 @@
       <button class="toolbar-btn" onclick="wrapText('**','**')"><b>B</b></button>
       <button class="toolbar-btn" onclick="wrapText('*','*')"><i>I</i></button>
       <button class="toolbar-btn" onclick="insertBlock('\n\n> ')">❝ Quote</button>
-      <button class="toolbar-btn" onclick="insertBlock('\n\n— ')">— Break</button>
-      <select id="anonSelect" style="padding:5px 10px;border:1px solid var(--border);border-radius:4px;font-size:13px;font-family:'Inter',sans-serif;cursor:pointer;color:var(--ink-soft);">
+      <select id="anonSelect" style="padding:5px 10px;border:1px solid var(--border);border-radius:4px;font-size:13px;font-family:'Inter',sans-serif;color:var(--ink-soft);">
         <option>Publish with my name</option>
         <option>Use a pseudonym</option>
         <option>Stay anonymous</option>
@@ -355,7 +358,7 @@
   </div>
 </div>
 
-<!-- HOME PAGE -->
+<!-- HOME -->
 <div class="page active" id="page-home">
   <div class="hero">
     <div>
@@ -369,14 +372,8 @@
     </div>
     <div class="hero-visual">
       <div class="stat-row">
-        <div class="stat-card">
-          <div class="stat-number">1 in 3</div>
-          <div class="stat-label">women experience violence globally</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">70%</div>
-          <div class="stat-label">never report workplace harassment</div>
-        </div>
+        <div class="stat-card"><div class="stat-number">1 in 3</div><div class="stat-label">women experience violence globally</div></div>
+        <div class="stat-card"><div class="stat-number">70%</div><div class="stat-label">never report workplace harassment</div></div>
       </div>
       <div class="quote-card">
         <p class="quote-text">"The way you treat your mother is the way you see women. Start there."</p>
@@ -389,52 +386,22 @@
 
   <div class="strip">
     <div class="strip-header">
-      <span class="strip-label">This week's issue — Vol. 1</span>
+      <span class="strip-label" id="homeIssueLabel">Latest issue</span>
       <span class="strip-link" onclick="showPage('magazine')">All issues →</span>
     </div>
-    <div class="articles-grid">
-      <div class="article-card" onclick="showArticle('mothers')">
-        <div class="article-thumb article-thumb-lg">
-          <div class="thumb-label">FS.</div>
-          <span class="art-badge">Cover story</span>
-        </div>
-        <p class="art-tag">Personal stories</p>
-        <h2 class="art-title">The call I never made — letters to the mothers we forgot to appreciate</h2>
-        <p class="art-excerpt">Voices from six countries writing to the women who shaped them — and reflecting on how ordinary moments became invisible.</p>
-        <p class="art-meta">Community contributors · 8 min read</p>
-      </div>
-      <div class="side-stack">
-        <div class="article-card" onclick="showArticle('workplace')">
-          <div class="article-thumb">
-            <div class="thumb-label">FS.</div>
-          </div>
-          <p class="art-tag">Workplace</p>
-          <h3 class="art-title art-title-sm">Still asked to take notes: gender roles in the modern office</h3>
-          <p class="art-meta">Analysis · 5 min read</p>
-        </div>
-        <div class="article-card" onclick="showArticle('culture')">
-          <div class="article-thumb">
-            <div class="thumb-label">FS.</div>
-          </div>
-          <p class="art-tag">Culture</p>
-          <h3 class="art-title art-title-sm">What cinema taught us about respecting women — and what it got wrong</h3>
-          <p class="art-meta">Cultural reflection · 6 min read</p>
-        </div>
-      </div>
+    <div id="homeArticles">
+      <div class="loading-state"><div class="loading-spinner"></div><br>Loading articles…</div>
     </div>
   </div>
 
   <hr class="divider" />
 
   <div class="strip">
-    <div class="strip-header">
-      <span class="strip-label">Explore by topic</span>
-      <span class="strip-link" onclick="showPage('topics')">All topics →</span>
-    </div>
+    <div class="strip-header"><span class="strip-label">Explore by topic</span><span class="strip-link" onclick="showPage('topics')">All topics →</span></div>
     <div class="topics-grid">
-      <div class="topic-card" onclick="showPage('topics')"><div class="topic-icon">🤍</div><p class="topic-name">Personal stories</p><p class="topic-desc">Real experiences from women and the people who reflect on how they've treated them.</p></div>
+      <div class="topic-card" onclick="showPage('topics')"><div class="topic-icon">🤍</div><p class="topic-name">Personal stories</p><p class="topic-desc">Real experiences from women and those who reflect on how they've treated them.</p></div>
       <div class="topic-card" onclick="showPage('topics')"><div class="topic-icon">💼</div><p class="topic-name">Workplace issues</p><p class="topic-desc">Harassment, inequality, and the power dynamics that persist in professional spaces.</p></div>
-      <div class="topic-card" onclick="showPage('topics')"><div class="topic-icon">🌍</div><p class="topic-name">Culture & media</p><p class="topic-desc">How films, language, and tradition shape — and sometimes distort — how we see women.</p></div>
+      <div class="topic-card" onclick="showPage('topics')"><div class="topic-icon">🌍</div><p class="topic-name">Culture & media</p><p class="topic-desc">How films, language, and tradition shape how we see women.</p></div>
       <div class="topic-card" onclick="showPage('topics')"><div class="topic-icon">🧠</div><p class="topic-name">Mental health</p><p class="topic-desc">The emotional weight of discrimination and the path to healing.</p></div>
       <div class="topic-card" onclick="showPage('topics')"><div class="topic-icon">⚖️</div><p class="topic-name">Rights & law</p><p class="topic-desc">What the law says, where it falls short, and what communities are doing about it.</p></div>
       <div class="topic-card" onclick="showPage('topics')"><div class="topic-icon">✊</div><p class="topic-name">Changemakers</p><p class="topic-desc">Stories of people and movements rebuilding respect from the ground up.</p></div>
@@ -443,46 +410,23 @@
 
   <div class="strip" style="padding-top:0;">
     <div class="submit-band">
-      <div>
-        <h2>Your voice belongs here.</h2>
-        <p>Full Stop is built on community stories. Write and submit directly — from anywhere in the world.</p>
-      </div>
+      <div><h2>Your voice belongs here.</h2><p>Full Stop is built on community stories. Write and submit directly — from anywhere in the world.</p></div>
       <button class="btn-white" onclick="openWriter()">Write your story →</button>
     </div>
   </div>
 
   <footer>
     <div class="footer-inner">
-      <div class="footer-brand">
-        <span class="logo" onclick="showPage('home')" style="color:var(--white);">Full Stop<span style="color:var(--red)">.</span></span>
-        <p style="margin-top:0.8rem;">A global platform raising awareness about discrimination and harassment against women — one story at a time.</p>
-      </div>
-      <div class="footer-col">
-        <h4>Read</h4>
-        <a onclick="showPage('magazine')">Magazine</a>
-        <a onclick="showPage('topics')">Topics</a>
-        <a onclick="showPage('magazine')">Latest issue</a>
-      </div>
-      <div class="footer-col">
-        <h4>Contribute</h4>
-        <a onclick="openWriter()">Write your story</a>
-        <a onclick="showPage('write')">Guidelines</a>
-        <a onclick="showPage('about')">Our mission</a>
-      </div>
-      <div class="footer-col">
-        <h4>Follow</h4>
-        <a href="https://substack.com/@vibhavgautam" target="_blank">Substack</a>
-        <a href="https://medium.com/@vibhav0312" target="_blank">Medium</a>
-      </div>
+      <div class="footer-brand"><span class="logo" onclick="showPage('home')" style="color:var(--white);">Full Stop<span style="color:var(--red)">.</span></span><p style="margin-top:0.8rem;">A global platform raising awareness about discrimination and harassment against women — one story at a time.</p></div>
+      <div class="footer-col"><h4>Read</h4><a onclick="showPage('magazine')">Magazine</a><a onclick="showPage('topics')">Topics</a></div>
+      <div class="footer-col"><h4>Contribute</h4><a onclick="openWriter()">Write your story</a><a onclick="showPage('write')">Guidelines</a><a onclick="showPage('about')">About</a></div>
+      <div class="footer-col"><h4>Follow</h4><a href="https://substack.com/@vibhavgautam" target="_blank">Substack</a><a href="https://medium.com/@vibhav0312" target="_blank">Medium</a></div>
     </div>
-    <div class="footer-bottom">
-      <span>© 2025 Full Stop. All rights reserved.</span>
-      <span>Made with purpose.</span>
-    </div>
+    <div class="footer-bottom"><span>© 2025 Full Stop. All rights reserved.</span><span>Made with purpose.</span></div>
   </footer>
 </div>
 
-<!-- MAGAZINE PAGE -->
+<!-- MAGAZINE -->
 <div class="page" id="page-magazine">
   <div class="magazine">
     <div class="mag-header">
@@ -490,31 +434,8 @@
       <h1 class="mag-title">The Magazine</h1>
       <p class="mag-sub">Every week, a new issue. Every issue, real voices. Every story, a reason to care.</p>
     </div>
-    <div class="issues-grid" id="issuesGrid">
-      <div class="issue-card" onclick="showArticle('mothers')">
-        <div class="issue-cover"><div class="issue-vol">01</div><span class="issue-badge">Latest</span></div>
-        <div class="issue-body">
-          <p class="issue-vol-label">Vol. 1 · Week 1</p>
-          <p class="issue-title">The call I never made</p>
-          <p class="issue-date">June 2025</p>
-        </div>
-      </div>
-      <div class="issue-card" onclick="showArticle('workplace')">
-        <div class="issue-cover"><div class="issue-vol">02</div></div>
-        <div class="issue-body">
-          <p class="issue-vol-label">Vol. 1 · Week 2</p>
-          <p class="issue-title">Still asked to take notes</p>
-          <p class="issue-date">June 2025</p>
-        </div>
-      </div>
-      <div class="issue-card" onclick="showArticle('culture')">
-        <div class="issue-cover"><div class="issue-vol">03</div></div>
-        <div class="issue-body">
-          <p class="issue-vol-label">Vol. 1 · Week 3</p>
-          <p class="issue-title">What cinema got wrong</p>
-          <p class="issue-date">June 2025</p>
-        </div>
-      </div>
+    <div class="issues-grid" id="magazineGrid">
+      <div class="loading-state" style="grid-column:1/-1;"><div class="loading-spinner"></div><br>Loading issues…</div>
     </div>
   </div>
   <footer>
@@ -531,7 +452,7 @@
 <!-- ARTICLE READER -->
 <div class="page" id="page-article">
   <div class="reader">
-    <button class="reader-back" onclick="showPage('magazine')">← Back to magazine</button>
+    <button class="reader-back" id="readerBack" onclick="showPage('magazine')">← Back to magazine</button>
     <p class="reader-tag" id="art-tag"></p>
     <h1 class="reader-title" id="art-title"></h1>
     <p class="reader-meta" id="art-meta"></p>
@@ -539,26 +460,26 @@
   </div>
 </div>
 
-<!-- TOPICS PAGE -->
+<!-- TOPICS -->
 <div class="page" id="page-topics">
   <div class="topics-page">
-    <div class="topics-page-header">
+    <div style="text-align:center;">
       <p class="hero-eyebrow">Explore</p>
-      <h1 class="topics-page-header" style="font-family:'Playfair Display',serif;font-size:48px;font-weight:600;margin-bottom:0.8rem;">Every dimension of the conversation.</h1>
-      <p style="font-size:17px;color:var(--muted);">Full Stop covers six editorial pillars — each one a different lens on the same urgent truth.</p>
+      <h1 style="font-family:'Playfair Display',serif;font-size:48px;font-weight:600;margin-bottom:0.8rem;">Every dimension of the conversation.</h1>
+      <p style="font-size:17px;color:var(--muted);">Six editorial pillars — each a different lens on the same urgent truth.</p>
     </div>
     <div class="topics-full-grid">
-      <div class="topic-full-card" onclick="showPage('magazine')"><div class="topic-full-icon">🤍</div><p class="topic-full-name">Personal stories</p><p class="topic-full-desc">The most powerful case for change is a human one. These are the stories of real women — and the people who have reflected on how they've treated them. Raw, honest, and necessary.</p><p class="topic-full-count">3 articles published</p></div>
-      <div class="topic-full-card" onclick="showPage('magazine')"><div class="topic-full-icon">💼</div><p class="topic-full-name">Workplace issues</p><p class="topic-full-desc">Harassment, invisible labour, the gender pay gap, and the quiet ways professional spaces still diminish women. We name it, analyse it, and ask what needs to change.</p><p class="topic-full-count">1 article published</p></div>
-      <div class="topic-full-card" onclick="showPage('magazine')"><div class="topic-full-icon">🌍</div><p class="topic-full-name">Culture & media</p><p class="topic-full-desc">Films, music, advertising, and tradition all teach us something about women. Full Stop asks: what exactly are they teaching? And is it worth keeping?</p><p class="topic-full-count">1 article published</p></div>
-      <div class="topic-full-card" onclick="showPage('magazine')"><div class="topic-full-icon">🧠</div><p class="topic-full-name">Mental health</p><p class="topic-full-desc">Discrimination leaves marks that aren't always visible. We explore the psychological toll of harassment and the paths — individual and collective — toward healing.</p><p class="topic-full-count">Coming soon</p></div>
-      <div class="topic-full-card" onclick="showPage('magazine')"><div class="topic-full-icon">⚖️</div><p class="topic-full-name">Rights & law</p><p class="topic-full-desc">Understanding legal protections — and their limits — is power. We break down what the law says about discrimination and harassment, and where it still fails women.</p><p class="topic-full-count">Coming soon</p></div>
-      <div class="topic-full-card" onclick="showPage('magazine')"><div class="topic-full-icon">✊</div><p class="topic-full-name">Changemakers</p><p class="topic-full-desc">The people and movements actively rebuilding respect — from policy advocacy to grassroots community work. Stories that prove change is possible and already happening.</p><p class="topic-full-count">Coming soon</p></div>
+      <div class="topic-full-card" onclick="showPage('magazine')"><div class="topic-full-icon">🤍</div><p class="topic-full-name">Personal stories</p><p class="topic-full-desc">The most powerful case for change is a human one. Real stories from women — and the people who reflect on how they've treated them.</p><p class="topic-full-count">Stories published weekly</p></div>
+      <div class="topic-full-card" onclick="showPage('magazine')"><div class="topic-full-icon">💼</div><p class="topic-full-name">Workplace issues</p><p class="topic-full-desc">Harassment, invisible labour, the gender pay gap, and the quiet ways professional spaces still diminish women.</p><p class="topic-full-count">Stories published weekly</p></div>
+      <div class="topic-full-card" onclick="showPage('magazine')"><div class="topic-full-icon">🌍</div><p class="topic-full-name">Culture & media</p><p class="topic-full-desc">Films, music, advertising, and tradition all teach us something about women. What exactly are they teaching?</p><p class="topic-full-count">Stories published weekly</p></div>
+      <div class="topic-full-card" onclick="showPage('magazine')"><div class="topic-full-icon">🧠</div><p class="topic-full-name">Mental health</p><p class="topic-full-desc">Discrimination leaves marks that aren't always visible. The psychological toll of harassment and paths toward healing.</p><p class="topic-full-count">Stories published weekly</p></div>
+      <div class="topic-full-card" onclick="showPage('magazine')"><div class="topic-full-icon">⚖️</div><p class="topic-full-name">Rights & law</p><p class="topic-full-desc">Understanding legal protections — and their limits. What the law says about discrimination and where it still fails women.</p><p class="topic-full-count">Stories published weekly</p></div>
+      <div class="topic-full-card" onclick="showPage('magazine')"><div class="topic-full-icon">✊</div><p class="topic-full-name">Changemakers</p><p class="topic-full-desc">People and movements actively rebuilding respect — from policy advocacy to grassroots community work.</p><p class="topic-full-count">Stories published weekly</p></div>
     </div>
   </div>
   <footer>
     <div class="footer-inner">
-      <div class="footer-brand"><span class="logo" onclick="showPage('home')" style="color:var(--white);">Full Stop<span style="color:var(--red)">.</span></span><p style="margin-top:0.8rem;">A global platform raising awareness about discrimination and harassment.</p></div>
+      <div class="footer-brand"><span class="logo" onclick="showPage('home')" style="color:var(--white);">Full Stop<span style="color:var(--red)">.</span></span><p style="margin-top:0.8rem;">A global platform raising awareness.</p></div>
       <div class="footer-col"><h4>Read</h4><a onclick="showPage('home')">Home</a><a onclick="showPage('magazine')">Magazine</a></div>
       <div class="footer-col"><h4>Contribute</h4><a onclick="openWriter()">Write your story</a><a onclick="showPage('about')">About</a></div>
       <div class="footer-col"><h4>Follow</h4><a href="https://substack.com/@vibhavgautam" target="_blank">Substack</a><a href="https://medium.com/@vibhav0312" target="_blank">Medium</a></div>
@@ -567,43 +488,41 @@
   </footer>
 </div>
 
-<!-- WRITE FOR US PAGE -->
+<!-- WRITE FOR US -->
 <div class="page" id="page-write">
   <div class="wfu">
     <div class="wfu-hero">
       <p class="wfu-eyebrow">Write for Full Stop</p>
       <h1 class="wfu-title">Your story can change how someone sees the world.</h1>
-      <p class="wfu-sub">Full Stop is an open platform. We publish essays, personal accounts, cultural analysis, and advocacy pieces from contributors everywhere — no credentials required.</p>
+      <p class="wfu-sub">Full Stop is an open platform. Essays, personal accounts, cultural analysis, advocacy pieces — any format, any voice, from anywhere.</p>
     </div>
     <div class="guidelines">
-      <div class="guide-card"><h3>📝 What we publish</h3><p>Personal essays, open letters, workplace experiences, cultural commentary, legal awareness pieces, and stories of resilience. Any format, any voice.</p></div>
-      <div class="guide-card"><h3>🌍 Who can submit</h3><p>Anyone, anywhere in the world. We welcome submissions in all languages. Every voice deserves to be heard — regardless of background or credentials.</p></div>
-      <div class="guide-card"><h3>📏 Length & format</h3><p>500–2500 words is ideal. Write naturally — your story matters more than your structure. We'll work with you on editing before publishing.</p></div>
-      <div class="guide-card"><h3>🔒 Anonymity</h3><p>You can publish under a pseudonym or remain fully anonymous. Your safety matters. Select your preference in the editor and we'll honour it completely.</p></div>
+      <div class="guide-card"><h3>📝 What we publish</h3><p>Personal essays, open letters, workplace experiences, cultural commentary, legal awareness, and stories of resilience. Any format.</p></div>
+      <div class="guide-card"><h3>🌍 Who can submit</h3><p>Anyone, anywhere in the world. All languages welcome. Every voice deserves to be heard — regardless of background or credentials.</p></div>
+      <div class="guide-card"><h3>📏 Length & format</h3><p>500–2500 words ideal. Write naturally — your story matters more than structure. We'll work with you on editing before publishing.</p></div>
+      <div class="guide-card"><h3>🔒 Anonymity</h3><p>Publish under a pseudonym or remain fully anonymous. Your safety matters. Select your preference in the editor.</p></div>
     </div>
-    <div class="wfu-cta-center">
+    <div style="text-align:center;">
       <button class="btn-red" style="font-size:16px;padding:16px 40px;" onclick="openWriter()">Open the editor and start writing →</button>
       <p style="font-size:13px;color:var(--muted);margin-top:1rem;">No account needed. Just you and your words.</p>
     </div>
   </div>
 </div>
 
-<!-- ABOUT PAGE -->
+<!-- ABOUT -->
 <div class="page" id="page-about">
   <div class="about">
-    <div class="about-hero">
-      <h1 class="about-title">We put a <em>full stop</em><br>on silence.</h1>
-    </div>
+    <h1 class="about-title">We put a <em>full stop</em><br>on silence.</h1>
     <div class="about-body">
       <p>Full Stop was born from a simple but urgent observation: we talk about discrimination and harassment in the abstract — in statistics, in headlines — but rarely in the personal. Rarely in the question that actually changes people: <em>how do you treat the women in your own life?</em></p>
-      <p>The initiative exists to close that gap. To bring awareness home. To remind people that the woman at the centre of every discrimination story is someone's mother, sister, daughter, friend — and often someone they love. When that recognition takes hold, change follows.</p>
+      <p>The initiative exists to close that gap. To bring awareness home. To remind people that the woman at the centre of every discrimination story is someone's mother, sister, daughter, friend — and often someone they love.</p>
       <p>Full Stop is a globally open platform. We publish weekly — stories, essays, cultural analysis, legal awareness, and first-hand accounts from contributors everywhere. No paywalls. No gatekeeping. Every voice is welcome.</p>
     </div>
     <div class="values-grid">
-      <div class="value-card"><p class="value-title">Personal over political</p><p class="value-desc">Change starts when people see themselves in the story. We lead with human experience, not just systems.</p></div>
-      <div class="value-card"><p class="value-title">Open to all voices</p><p class="value-desc">We publish anyone — regardless of geography, credentials, or language. Your story is enough.</p></div>
+      <div class="value-card"><p class="value-title">Personal over political</p><p class="value-desc">Change starts when people see themselves in the story. We lead with human experience.</p></div>
+      <div class="value-card"><p class="value-title">Open to all voices</p><p class="value-desc">We publish anyone — regardless of geography, credentials, or language.</p></div>
       <div class="value-card"><p class="value-title">Globally rooted</p><p class="value-desc">Discrimination has no borders. Neither do we. Full Stop publishes from every continent.</p></div>
-      <div class="value-card"><p class="value-title">Free, always</p><p class="value-desc">Access to awareness should never cost money. Full Stop is and will remain free to read and contribute.</p></div>
+      <div class="value-card"><p class="value-title">Free, always</p><p class="value-desc">Access to awareness should never cost money. Full Stop is and will remain free.</p></div>
     </div>
     <div class="founder-card">
       <div class="founder-avatar">V</div>
@@ -620,14 +539,14 @@
   </div>
 </div>
 
-<!-- ADMIN PAGE -->
+<!-- ADMIN -->
 <div class="page" id="page-admin">
   <div id="adminLoginSection">
     <div class="admin-login">
       <div style="font-size:32px;margin-bottom:1rem;">✦</div>
       <h2>Admin access</h2>
       <p>Full Stop editorial panel — Vibhav only.</p>
-      <p class="admin-error" id="adminError">Incorrect password. Try again.</p>
+      <p class="admin-error" id="adminError">Incorrect password.</p>
       <input type="password" id="adminPassword" placeholder="Enter password" onkeydown="if(event.key==='Enter')adminLogin()" />
       <button onclick="adminLogin()">Enter</button>
     </div>
@@ -636,109 +555,186 @@
     <div class="admin-panel">
       <div class="admin-header">
         <h1>Editorial panel</h1>
-        <button class="del-btn" onclick="adminLogout()">Log out</button>
+        <button class="action-btn" onclick="adminLogout()">Log out</button>
       </div>
       <div class="admin-tabs">
-        <button class="admin-tab active" onclick="switchTab('publish')">✦ Publish new article</button>
-        <button class="admin-tab" onclick="switchTab('published')">📋 Published articles</button>
+        <button class="admin-tab active" onclick="switchTab('publish',this)">✦ Publish article</button>
+        <button class="admin-tab" onclick="switchTab('published',this)">📋 Published</button>
+        <button class="admin-tab" onclick="switchTab('submissions',this)">📬 Submissions</button>
       </div>
       <div class="admin-section active" id="tab-publish">
-        <div class="admin-publish-form">
+        <div class="admin-form">
           <h2>Write & publish</h2>
           <div class="form-row-2">
-            <div class="form-group">
-              <label>Article title *</label>
-              <input type="text" id="a-title" placeholder="Your article title" />
-            </div>
-            <div class="form-group">
-              <label>Topic category *</label>
+            <div class="form-group"><label>Article title *</label><input type="text" id="a-title" placeholder="Your article title" /></div>
+            <div class="form-group"><label>Category *</label>
               <select id="a-category">
                 <option value="">Select category</option>
-                <option>Personal story</option>
-                <option>Workplace issues</option>
-                <option>Culture & media</option>
-                <option>Mental health</option>
-                <option>Rights & law</option>
-                <option>Changemakers</option>
+                <option>Personal story</option><option>Workplace issues</option><option>Culture & media</option>
+                <option>Mental health</option><option>Rights & law</option><option>Changemakers</option>
               </select>
             </div>
           </div>
           <div class="form-row-2">
-            <div class="form-group">
-              <label>Byline</label>
-              <input type="text" id="a-byline" placeholder="e.g. By Vibhav · Founder" />
-            </div>
-            <div class="form-group">
-              <label>Read time</label>
-              <input type="text" id="a-readtime" placeholder="e.g. 5 min read" />
-            </div>
+            <div class="form-group"><label>Byline</label><input type="text" id="a-byline" placeholder="By Vibhav" /></div>
+            <div class="form-group"><label>Read time</label><input type="text" id="a-readtime" placeholder="5 min read" /></div>
           </div>
-          <div class="form-group">
-            <label>Article content *</label>
-            <textarea id="a-content" placeholder="Write your full article here. Separate paragraphs with blank lines. Start a line with > for a blockquote."></textarea>
-          </div>
+          <div class="form-group"><label>Excerpt (shown in magazine grid)</label><input type="text" id="a-excerpt" placeholder="One sentence summary…" /></div>
+          <div class="form-group"><label>Article content *</label><textarea id="a-content" placeholder="Write your full article here. Separate paragraphs with blank lines. Start a line with > for a blockquote."></textarea></div>
           <button class="publish-btn" onclick="publishArticle()">Publish to Full Stop →</button>
+          <span id="publishStatus" style="font-size:13px;color:var(--muted);margin-left:1rem;"></span>
         </div>
       </div>
       <div class="admin-section" id="tab-published">
-        <div class="published-list" id="publishedList"></div>
+        <div class="published-list" id="publishedList"><div class="loading-state"><div class="loading-spinner"></div><br>Loading…</div></div>
+      </div>
+      <div class="admin-section" id="tab-submissions">
+        <div id="submissionsList"><div class="loading-state"><div class="loading-spinner"></div><br>Loading submissions…</div></div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-  const ADMIN_PASSWORD = '03122009';
+  const SUPABASE_URL = 'https://codzzkdvgpifhtqvnhjw.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNvZHp6a2R2Z3BpZmh0cXZuaGp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3MzY5MDYsImV4cCI6MjA5ODMxMjkwNn0.fepOui5ZsIwT0O3dteeuijMafqloa3w80Jbk65Gj03o';
   const FORMSPREE_URL = 'https://formspree.io/f/mrewzyvr';
+  const ADMIN_PASSWORD = '03122009';
 
+  const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   let adminLoggedIn = false;
-  let publishedArticles = JSON.parse(localStorage.getItem('fs_articles') || '[]');
+  let currentArticleSource = 'magazine';
 
-  const builtInArticles = {
-    mothers: {
-      tag: 'Personal stories',
-      title: 'The call I never made — letters to the mothers we forgot to appreciate',
-      meta: 'Community contributors · 8 min read · Full Stop Vol. 1',
-      body: `<p>There is a call most of us have not made. Not because we forgot the number, but because we assumed there would be time. We assumed she would always be there, the way kitchens are always there — warm, constant, easy to take for granted.</p><blockquote>"I used to come home from school and she'd ask about my day. I'd say 'fine' and go to my room. I never asked about hers. Not once, in fifteen years."</blockquote><p>This is not a story about regret. It is a story about recognition — the kind that arrives quietly, in adulthood, when you begin to understand the size of what someone did for you simply by staying.</p><p>We collected letters from contributors across six countries: India, Nigeria, Brazil, Germany, the Philippines, and the UK. We asked them one question: <em>What would you say to your mother if you wrote her a letter today?</em></p><p>The answers were not grand. They were about chai left on counters. About school uniforms ironed at midnight. About a woman who worked double shifts and still showed up to every parent-teacher meeting, sitting in the back row so she wouldn't embarrass anyone.</p><blockquote>"She never raised her voice. Even when she had every reason to. I don't know how she held that kind of quiet. I'm still learning."</blockquote><p>The women in these letters are not icons. They are ordinary people who were treated — too often — as though their ordinariness made them invisible. Who kept households and hearts running while the world moved around them, rarely stopping to say: <em>I see you. Thank you. I'm sorry it took me this long.</em></p><p>Full Stop exists because this conversation — personal, honest, uncomfortable — is where change actually begins. Not in policy papers. Not in hashtags. In the moment a person looks at the woman who raised them and finally asks: how have I treated her?</p><p>Make the call. Write the letter. It is not too late.</p>`
+  const builtInArticles = [
+    {
+      id: 'builtin-1', title: 'The call I never made — letters to the mothers we forgot to appreciate',
+      category: 'Personal story', byline: 'Community contributors', read_time: '8 min read',
+      excerpt: 'Voices from six countries writing to the women who shaped them.',
+      published_at: '2025-06-01',
+      content: `There is a call most of us have not made. Not because we forgot the number, but because we assumed there would be time.\n\n> "I used to come home from school and she'd ask about my day. I'd say 'fine' and go to my room. I never asked about hers. Not once, in fifteen years."\n\nThis is not a story about regret. It is a story about recognition — the kind that arrives quietly, in adulthood, when you begin to understand the size of what someone did for you simply by staying.\n\nWe collected letters from contributors across six countries: India, Nigeria, Brazil, Germany, the Philippines, and the UK. We asked them one question: What would you say to your mother if you wrote her a letter today?\n\nThe answers were not grand. They were about chai left on counters. About school uniforms ironed at midnight. About a woman who worked double shifts and still showed up to every parent-teacher meeting.\n\n> "She never raised her voice. Even when she had every reason to. I don't know how she held that kind of quiet. I'm still learning."\n\nFull Stop exists because this conversation — personal, honest, uncomfortable — is where change actually begins. Make the call. Write the letter. It is not too late.`
     },
-    workplace: {
-      tag: 'Workplace',
-      title: 'Still asked to take notes: gender roles in the modern office',
-      meta: 'Analysis · 5 min read · Full Stop Vol. 1',
-      body: `<p>The meeting begins. There are twelve people in the room — seven men, five women. Someone needs to take notes. Everyone looks, without quite meaning to, at the women.</p><p>This moment, repeated in offices across every industry and continent, is so ordinary it has become invisible. And that is precisely the problem.</p><blockquote>"I'm a senior engineer with twelve years of experience. I've been asked to take notes, organise the team lunch, and book the meeting room more times than I can count. My male colleagues have never been asked once."</blockquote><p>The modern workplace has made significant progress on the surface — more women in leadership, more diversity statements, more HR training. But beneath the visible progress, the architecture of gendered expectation remains largely intact.</p><p>Office housework — the invisible labour of note-taking, event planning, emotional support, and administrative smoothing — still falls disproportionately on women. Research consistently shows that women are more likely to be asked, and more likely to feel unable to refuse, because the social cost of saying no is higher for them.</p><blockquote>"When I stopped volunteering to take notes, no one else stepped in. The meeting just ended with no record. That told me everything."</blockquote><p>Full Stop does not believe the solution is individual. It is structural. Organisations need to audit who does what invisible labour, rotate it deliberately, and make the ask itself a conscious act rather than a reflex.</p>`
+    {
+      id: 'builtin-2', title: 'Still asked to take notes: gender roles in the modern office',
+      category: 'Workplace issues', byline: 'Full Stop editorial', read_time: '5 min read',
+      excerpt: 'The invisible labour that still falls on women in every workplace.',
+      published_at: '2025-06-08',
+      content: `The meeting begins. There are twelve people in the room — seven men, five women. Someone needs to take notes. Everyone looks, without quite meaning to, at the women.\n\nThis moment, repeated in offices across every industry and continent, is so ordinary it has become invisible. And that is precisely the problem.\n\n> "I'm a senior engineer with twelve years of experience. I've been asked to take notes more times than I can count. My male colleagues have never been asked once."\n\nOffice housework — the invisible labour of note-taking, event planning, emotional support — still falls disproportionately on women. Research consistently shows that women are more likely to be asked, and more likely to feel unable to refuse.\n\n> "When I stopped volunteering to take notes, no one else stepped in. The meeting just ended with no record. That told me everything."\n\nFull Stop believes the solution is structural. Organisations need to audit who does what invisible labour and rotate it deliberately.`
     },
-    culture: {
-      tag: 'Culture',
-      title: 'What cinema taught us about respecting women — and what it got wrong',
-      meta: 'Cultural reflection · 6 min read · Full Stop Vol. 1',
-      body: `<p>For most of us, the first stories we were told about women came from screens. From films where the woman waited, endured, or existed primarily in relation to a man. Where her anger was irrational. Her ambition, threatening. Her silence, romantic.</p><p>Cinema is not just entertainment. It is instruction. It tells us, quietly and repeatedly, what to expect from women — and what to expect from ourselves in relation to them.</p><blockquote>"I grew up watching heroes chase women who said no until they said yes. I thought that was romance. It took me years to understand what I'd actually been taught."</blockquote><p>The global film industry — Bollywood, Hollywood, Nollywood, and beyond — has made strides in the past decade. More female directors, more complex female characters, more films that pass the basic threshold of women speaking to each other about something other than a man.</p><p>But the legacy of a century of storytelling does not dissolve in a decade. The images are in us already — the damsel, the temptress, the nagging wife, the woman who exists to motivate the man's grief. These are not neutral archetypes. They are a curriculum.</p><blockquote>"My daughter watches the same films I watched. I pay attention differently now. I see what she's learning."</blockquote><p>Full Stop believes in the power of story to change this. Every article, essay, and voice on this platform is a counter-narrative — proof that women's experiences are worth the full complexity of language, attention, and space.</p>`
+    {
+      id: 'builtin-3', title: 'What cinema taught us about respecting women — and what it got wrong',
+      category: 'Culture & media', byline: 'Full Stop editorial', read_time: '6 min read',
+      excerpt: 'How a century of storytelling shaped what we expect from women.',
+      published_at: '2025-06-15',
+      content: `For most of us, the first stories we were told about women came from screens. From films where the woman waited, endured, or existed primarily in relation to a man.\n\nCinema is not just entertainment. It is instruction. It tells us, quietly and repeatedly, what to expect from women — and what to expect from ourselves in relation to them.\n\n> "I grew up watching heroes chase women who said no until they said yes. I thought that was romance. It took me years to understand what I'd actually been taught."\n\nThe global film industry has made strides in the past decade. More female directors, more complex female characters. But the legacy of a century of storytelling does not dissolve in a decade.\n\n> "My daughter watches the same films I watched. I pay attention differently now. I see what she's learning."\n\nEvery article, essay, and voice on Full Stop is a counter-narrative — proof that women's experiences are worth the full complexity of language, attention, and space.`
     }
-  };
+  ];
+
+  function formatContent(text) {
+    if (!text) return '';
+    return text.split('\n\n').map(para => {
+      if (!para.trim()) return '';
+      if (para.trim().startsWith('> ')) return '<blockquote>' + para.trim().slice(2) + '</blockquote>';
+      return '<p>' + para.trim() + '</p>';
+    }).join('');
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+  }
+
+  async function loadHomeArticles() {
+    const container = document.getElementById('homeArticles');
+    try {
+      const { data, error } = await db.from('articles').select('*').eq('is_published', true).order('published_at', { ascending: false }).limit(3);
+      const allArticles = [...(data || []).map(a => ({...a, source:'db'})), ...builtInArticles.map(a => ({...a, source:'builtin'}))];
+      const display = allArticles.slice(0, 3);
+      if (display.length === 0) { renderBuiltInHome(container); return; }
+      renderHomeGrid(container, display);
+    } catch(e) { renderBuiltInHome(container); }
+  }
+
+  function renderBuiltInHome(container) {
+    renderHomeGrid(container, builtInArticles.slice(0, 3));
+  }
+
+  function renderHomeGrid(container, articles) {
+    if (articles.length === 0) { container.innerHTML = '<div class="empty-state">No articles yet. Check back soon!</div>'; return; }
+    const main = articles[0];
+    const sides = articles.slice(1, 3);
+    container.innerHTML = `
+      <div class="articles-grid">
+        <div class="article-card" onclick="showArticle('${main.id}','${main.source||'builtin'}')">
+          <div class="article-thumb article-thumb-lg"><div class="thumb-label">FS.</div><span class="art-badge">Cover story</span></div>
+          <p class="art-tag">${main.category || ''}</p>
+          <h2 class="art-title">${main.title}</h2>
+          <p class="art-excerpt">${main.excerpt || ''}</p>
+          <p class="art-meta">${main.byline || ''} · ${main.read_time || ''}</p>
+        </div>
+        <div class="side-stack">
+          ${sides.map(a => `
+            <div class="article-card" onclick="showArticle('${a.id}','${a.source||'builtin'}')">
+              <div class="article-thumb"><div class="thumb-label">FS.</div></div>
+              <p class="art-tag">${a.category || ''}</p>
+              <h3 class="art-title art-title-sm">${a.title}</h3>
+              <p class="art-meta">${a.byline || ''} · ${a.read_time || ''}</p>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  async function loadMagazine() {
+    const grid = document.getElementById('magazineGrid');
+    try {
+      const { data } = await db.from('articles').select('*').eq('is_published', true).order('published_at', { ascending: false });
+      const dbArticles = (data || []).map(a => ({...a, source:'db'}));
+      const all = [...builtInArticles.map(a => ({...a, source:'builtin'})), ...dbArticles];
+      grid.innerHTML = all.map((a, i) => `
+        <div class="issue-card" onclick="showArticle('${a.id}','${a.source}')">
+          <div class="issue-cover"><div class="issue-vol">${String(i+1).padStart(2,'0')}</div>${i===0?'<span class="issue-badge">Latest</span>':''}</div>
+          <div class="issue-body">
+            <p class="issue-vol-label">${a.category || ''}</p>
+            <p class="issue-title">${a.title}</p>
+            <p class="issue-date">${formatDate(a.published_at)}</p>
+          </div>
+        </div>`).join('');
+    } catch(e) {
+      grid.innerHTML = builtInArticles.map((a,i) => `
+        <div class="issue-card" onclick="showArticle('${a.id}','builtin')">
+          <div class="issue-cover"><div class="issue-vol">${String(i+1).padStart(2,'0')}</div>${i===0?'<span class="issue-badge">Latest</span>':''}</div>
+          <div class="issue-body">
+            <p class="issue-vol-label">${a.category}</p>
+            <p class="issue-title">${a.title}</p>
+            <p class="issue-date">${formatDate(a.published_at)}</p>
+          </div>
+        </div>`).join('');
+    }
+  }
+
+  async function showArticle(id, source) {
+    source = source || 'builtin';
+    let article = null;
+    if (source === 'builtin') {
+      article = builtInArticles.find(a => a.id === id);
+    } else {
+      const { data } = await db.from('articles').select('*').eq('id', id).single();
+      article = data;
+    }
+    if (!article) return;
+    document.getElementById('art-tag').textContent = article.category || '';
+    document.getElementById('art-title').textContent = article.title;
+    document.getElementById('art-meta').textContent = (article.byline || '') + ' · ' + (article.read_time || '') + ' · Full Stop';
+    document.getElementById('art-body').innerHTML = formatContent(article.content);
+    showPage('article');
+  }
 
   function showPage(id) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     const page = document.getElementById('page-' + id);
-    if (page) { page.classList.add('active'); window.scrollTo(0, 0); }
+    if (page) { page.classList.add('active'); window.scrollTo(0,0); }
+    if (id === 'magazine') loadMagazine();
+    if (id === 'home') loadHomeArticles();
     if (id === 'admin') renderAdminPage();
-    if (id === 'magazine') renderMagazinePage();
-  }
-
-  function showArticle(key) {
-    const a = builtInArticles[key] || publishedArticles.find(p => p.id === key);
-    if (!a) return;
-    document.getElementById('art-tag').textContent = a.tag || a.category || '';
-    document.getElementById('art-title').textContent = a.title;
-    document.getElementById('art-meta').textContent = a.meta || (a.byline + ' · ' + a.readtime + ' · Full Stop');
-    document.getElementById('art-body').innerHTML = a.body || formatBody(a.content || '');
-    showPage('article');
-  }
-
-  function formatBody(text) {
-    return text.split('\n\n').map(para => {
-      if (!para.trim()) return '';
-      if (para.startsWith('> ')) return '<blockquote>' + para.slice(2) + '</blockquote>';
-      return '<p>' + para.trim() + '</p>';
-    }).join('');
   }
 
   function openWriter() {
@@ -753,80 +749,43 @@
     document.body.style.overflow = '';
   }
 
-  function autoResize(el) {
-    el.style.height = 'auto';
-    el.style.height = el.scrollHeight + 'px';
-  }
-
-  function wrapText(before, after) {
-    const ta = document.getElementById('w-content');
-    const start = ta.selectionStart, end = ta.selectionEnd;
-    const selected = ta.value.substring(start, end);
-    ta.value = ta.value.substring(0, start) + before + selected + after + ta.value.substring(end);
-    ta.focus();
-  }
-
-  function insertBlock(text) {
-    const ta = document.getElementById('w-content');
-    const pos = ta.selectionStart;
-    ta.value = ta.value.substring(0, pos) + text + ta.value.substring(pos);
-    ta.focus();
-  }
+  function autoResize(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+  function wrapText(b, a) { const ta = document.getElementById('w-content'); const s = ta.selectionStart, e = ta.selectionEnd; ta.value = ta.value.substring(0,s)+b+ta.value.substring(s,e)+a+ta.value.substring(e); ta.focus(); }
+  function insertBlock(t) { const ta = document.getElementById('w-content'); const p = ta.selectionStart; ta.value = ta.value.substring(0,p)+t+ta.value.substring(p); ta.focus(); }
 
   async function submitStory() {
     const email = document.getElementById('w-email').value.trim();
     const title = document.getElementById('w-title').value.trim();
     const content = document.getElementById('w-content').value.trim();
-    const name = document.getElementById('w-name').value.trim();
-    const category = document.getElementById('w-category').value;
-    const anon = document.getElementById('anonSelect').value;
-
-    if (!email || !title || !content) {
-      alert('Please fill in your email, a title, and your story before submitting.');
-      return;
-    }
-
+    if (!email || !title || !content) { alert('Please fill in your email, title, and story.'); return; }
     const btn = document.querySelector('.writer-submit-btn');
-    btn.textContent = 'Sending…';
-    btn.disabled = true;
-
+    btn.textContent = 'Sending…'; btn.disabled = true;
     try {
-      const res = await fetch(FORMSPREE_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ name, email, title, category, content, publishing_preference: anon })
-      });
-
-      if (res.ok) {
+      const { error } = await db.from('submissions').insert([{
+        name: document.getElementById('w-name').value.trim() || null,
+        email, title, content,
+        category: document.getElementById('w-category').value,
+        publishing_preference: document.getElementById('anonSelect').value
+      }]);
+      if (!error) {
+        await fetch(FORMSPREE_URL, { method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'}, body: JSON.stringify({name: document.getElementById('w-name').value, email, title, category: document.getElementById('w-category').value, note:'New submission saved to Supabase'}) });
         document.getElementById('writerForm').style.display = 'none';
         document.getElementById('writerSuccess').style.display = 'block';
-        document.getElementById('w-name').value = '';
-        document.getElementById('w-email').value = '';
-        document.getElementById('w-title').value = '';
-        document.getElementById('w-content').value = '';
-      } else {
-        alert('Something went wrong. Please try again.');
-        btn.textContent = 'Submit story';
-        btn.disabled = false;
-      }
-    } catch (e) {
-      alert('Could not send. Please check your connection and try again.');
-      btn.textContent = 'Submit story';
-      btn.disabled = false;
+      } else { throw error; }
+    } catch(e) {
+      alert('Could not submit. Please try again.');
+      btn.textContent = 'Submit story'; btn.disabled = false;
     }
   }
 
-  function toggleMenu() {
-    document.getElementById('mobileMenu').classList.toggle('open');
-  }
+  function toggleMenu() { document.getElementById('mobileMenu').classList.toggle('open'); }
 
   function adminLogin() {
-    const pw = document.getElementById('adminPassword').value;
-    if (pw === ADMIN_PASSWORD) {
+    if (document.getElementById('adminPassword').value === ADMIN_PASSWORD) {
       adminLoggedIn = true;
       document.getElementById('adminLoginSection').style.display = 'none';
       document.getElementById('adminPanelSection').style.display = 'block';
-      renderPublishedList();
+      loadPublishedList(); loadSubmissions();
     } else {
       document.getElementById('adminError').style.display = 'block';
       document.getElementById('adminPassword').value = '';
@@ -842,109 +801,78 @@
   }
 
   function renderAdminPage() {
-    if (!adminLoggedIn) {
-      document.getElementById('adminLoginSection').style.display = 'block';
-      document.getElementById('adminPanelSection').style.display = 'none';
-    }
+    if (!adminLoggedIn) { document.getElementById('adminLoginSection').style.display = 'block'; document.getElementById('adminPanelSection').style.display = 'none'; }
   }
 
-  function switchTab(tab) {
+  function switchTab(tab, btn) {
     document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
     document.getElementById('tab-' + tab).classList.add('active');
-    event.target.classList.add('active');
-    if (tab === 'published') renderPublishedList();
+    btn.classList.add('active');
+    if (tab === 'published') loadPublishedList();
+    if (tab === 'submissions') loadSubmissions();
   }
 
-  function publishArticle() {
+  async function publishArticle() {
     const title = document.getElementById('a-title').value.trim();
     const category = document.getElementById('a-category').value;
-    const byline = document.getElementById('a-byline').value.trim() || 'By Vibhav';
-    const readtime = document.getElementById('a-readtime').value.trim() || '5 min read';
     const content = document.getElementById('a-content').value.trim();
-
-    if (!title || !content || !category) {
-      alert('Please fill in the title, category, and content.');
-      return;
-    }
-
-    const article = {
-      id: 'admin_' + Date.now(),
-      title, tag: category, category, byline, readtime,
-      meta: byline + ' · ' + readtime + ' · Full Stop',
-      content, body: formatBody(content),
-      date: new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
-    };
-
-    publishedArticles.unshift(article);
-    localStorage.setItem('fs_articles', JSON.stringify(publishedArticles));
-
-    document.getElementById('a-title').value = '';
-    document.getElementById('a-category').value = '';
-    document.getElementById('a-byline').value = '';
-    document.getElementById('a-readtime').value = '';
-    document.getElementById('a-content').value = '';
-
-    alert('✦ Article published successfully! It now appears in the magazine.');
-    renderPublishedList();
-    renderMagazinePage();
+    const byline = document.getElementById('a-byline').value.trim() || 'By Vibhav';
+    const read_time = document.getElementById('a-readtime').value.trim() || '5 min read';
+    const excerpt = document.getElementById('a-excerpt').value.trim();
+    if (!title || !category || !content) { alert('Please fill in title, category, and content.'); return; }
+    const status = document.getElementById('publishStatus');
+    status.textContent = 'Publishing…';
+    const { error } = await db.from('articles').insert([{ title, category, byline, read_time, content, excerpt, is_published: true }]);
+    if (!error) {
+      status.textContent = '✓ Published successfully!';
+      document.getElementById('a-title').value = '';
+      document.getElementById('a-category').value = '';
+      document.getElementById('a-byline').value = '';
+      document.getElementById('a-readtime').value = '';
+      document.getElementById('a-excerpt').value = '';
+      document.getElementById('a-content').value = '';
+      setTimeout(() => status.textContent = '', 3000);
+    } else { status.textContent = 'Error publishing. Try again.'; }
   }
 
-  function deleteArticle(id) {
-    if (!confirm('Delete this article? This cannot be undone.')) return;
-    publishedArticles = publishedArticles.filter(a => a.id !== id);
-    localStorage.setItem('fs_articles', JSON.stringify(publishedArticles));
-    renderPublishedList();
-    renderMagazinePage();
-  }
-
-  function renderPublishedList() {
+  async function loadPublishedList() {
     const list = document.getElementById('publishedList');
-    if (publishedArticles.length === 0) {
-      list.innerHTML = '<div class="empty-state">No articles published yet. Write your first one!</div>';
-      return;
-    }
-    list.innerHTML = publishedArticles.map(a => `
+    const { data, error } = await db.from('articles').select('*').order('published_at', { ascending: false });
+    if (!data || data.length === 0) { list.innerHTML = '<div class="empty-state">No articles published yet via admin. Built-in articles are always shown.</div>'; return; }
+    list.innerHTML = data.map(a => `
       <div class="published-item">
-        <div>
-          <p class="published-item-title">${a.title}</p>
-          <p class="published-item-meta">${a.tag} · ${a.date}</p>
-        </div>
+        <div><p class="published-item-title">${a.title}</p><p class="published-item-meta">${a.category} · ${formatDate(a.published_at)}</p></div>
         <div style="display:flex;gap:0.5rem;">
-          <button class="del-btn" onclick="showArticle('${a.id}')">Read</button>
-          <button class="del-btn" onclick="deleteArticle('${a.id}')">Delete</button>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  function renderMagazinePage() {
-    const grid = document.getElementById('issuesGrid');
-    if (!grid) return;
-    const builtIn = [
-      { key: 'mothers', vol: '01', label: 'Vol. 1 · Week 1', title: 'The call I never made', date: 'June 2025', latest: true },
-      { key: 'workplace', vol: '02', label: 'Vol. 1 · Week 2', title: 'Still asked to take notes', date: 'June 2025' },
-      { key: 'culture', vol: '03', label: 'Vol. 1 · Week 3', title: 'What cinema got wrong', date: 'June 2025' },
-    ];
-    const adminCards = publishedArticles.map((a, i) => `
-      <div class="issue-card" onclick="showArticle('${a.id}')">
-        <div class="issue-cover"><div class="issue-vol">${String(i + 4).padStart(2, '0')}</div></div>
-        <div class="issue-body">
-          <p class="issue-vol-label">${a.tag}</p>
-          <p class="issue-title">${a.title}</p>
-          <p class="issue-date">${a.date}</p>
+          <button class="action-btn" onclick="showArticle('${a.id}','db')">Read</button>
+          <button class="action-btn" onclick="deleteArticle('${a.id}')">Delete</button>
         </div>
       </div>`).join('');
-    grid.innerHTML = builtIn.map(b => `
-      <div class="issue-card" onclick="showArticle('${b.key}')">
-        <div class="issue-cover"><div class="issue-vol">${b.vol}</div>${b.latest ? '<span class="issue-badge">Latest</span>' : ''}</div>
-        <div class="issue-body">
-          <p class="issue-vol-label">${b.label}</p>
-          <p class="issue-title">${b.title}</p>
-          <p class="issue-date">${b.date}</p>
-        </div>
-      </div>`).join('') + adminCards;
   }
+
+  async function deleteArticle(id) {
+    if (!confirm('Delete this article permanently?')) return;
+    await db.from('articles').delete().eq('id', id);
+    loadPublishedList();
+  }
+
+  async function loadSubmissions() {
+    const list = document.getElementById('submissionsList');
+    const { data } = await db.from('submissions').select('*').order('submitted_at', { ascending: false });
+    if (!data || data.length === 0) { list.innerHTML = '<div class="empty-state">No submissions yet.</div>'; return; }
+    list.innerHTML = data.map(s => `
+      <div class="submission-item">
+        <div class="submission-header">
+          <div><p class="submission-title">${s.title}</p><p class="submission-meta">${s.name || 'Anonymous'} · ${s.email} · ${s.category || ''} · ${formatDate(s.submitted_at)}</p></div>
+          <span class="status-badge status-${s.status}">${s.status}</span>
+        </div>
+        <p style="font-size:12px;color:var(--muted);">Publishing: ${s.publishing_preference || ''}</p>
+        <div class="submission-preview">${s.content ? s.content.substring(0,300) + '…' : ''}</div>
+      </div>`).join('');
+  }
+
+  // Init
+  loadHomeArticles();
 </script>
 </body>
 </html>
